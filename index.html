@@ -169,11 +169,11 @@
           trimmedDuration += pauseDuration;
         }
         // Write an M300 to play a note with the calculated pitch and duration
-        gcode.push(
-          `M300 P${Math.round(
-            trimmedDuration * 1000 * tempoMultiplier
-          )} S${Math.round(frequency)}\n`
-        );
+          gcode.push(
+              replaceZeroFrequency(Math.round(frequency), Math.round(
+                  trimmedDuration * 1000 * tempoMultiplier
+              ))
+          );
 
         // Duet firmware needs G4 pauses between notes
         if (useG4) {
@@ -190,7 +190,7 @@
         // If the current note is released before the start of the next note, insert a pause
         if (pauseDuration >= minDuration) {
           gcode.push(
-            `M300 P${Math.round(pauseDuration * tempoMultiplier * 1000)} S0\n`
+            `G4 P${Math.round(pauseDuration * tempoMultiplier * 1000)}\n`
           );
           if (useG4) {
             gcode.push(
@@ -204,6 +204,13 @@
 
       const output = gcode.reduce((acc, e) => acc + e, "");
       document.getElementById("outputArea").value = output;
+    }
+
+    function replaceZeroFrequency(freq, time) {
+      if (freq === 0) {
+        return `G4 P${time}\n`;
+      }
+      return `M300 P${time} S${freq}\n`;
     }
   </script>
 </body>
